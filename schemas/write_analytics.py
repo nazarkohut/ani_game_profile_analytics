@@ -1,3 +1,4 @@
+"""Provides schemas for write analytics endpoint"""
 USER_SCHEMA = {
     'type': 'object',
     'required': ['user_id', 'user_rating'],
