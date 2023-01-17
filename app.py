@@ -1,9 +1,10 @@
+"""Run this file to start the server"""
 from flask import Flask, request, jsonify
 from flask_json_schema import JsonSchema, JsonValidationError
 
 from database.every_day_analytics import EveryDayAnalytics
 from enums.enums import TimeTypes
-from misc.functions import TimeBasedIds
+from misc.ids import TimeBasedIds
 from misc.time import Time
 from misc.week_analytics import WeekAnalytics
 from schemas.retrieve_analytics import RETRIEVE_ANALYTICS_BODY_SCHEMA
@@ -14,38 +15,46 @@ schema = JsonSchema(app)
 
 
 @app.errorhandler(Exception)
-def handle_error(e):
+def handle_error(error: any) -> jsonify:
+    """Global error handler. Helps to catch errors and return them in pretty format"""
     code = 500
-    if isinstance(e, ValueError):
-        return jsonify(error=str(e)), 400
-    if isinstance(e, Exception):
-        return jsonify(error=str(e)), 400
-    if isinstance(e, NotImplementedError):
-        return jsonify(error=str(e)), 400
-    return jsonify(error=str(e)), code
+    if isinstance(error, ValueError):
+        return jsonify(error=str(error)), 400
+    if isinstance(error, Exception):
+        return jsonify(error=str(error)), 400
+    if isinstance(error, NotImplementedError):
+        return jsonify(error=str(error)), 400
+    return jsonify(error=str(error)), code
 
 
 @app.errorhandler(JsonValidationError)
-def schema_validation_error(e):
+def schema_validation_error(error):
     """Schema errors handler"""
-    return jsonify({'error': e.message, 'errors': [validation_error.message for validation_error in e.errors]}), 400
+    return jsonify(
+        {
+            'error': error.message,
+            'errors': [validation_error.message for validation_error in error.errors]
+        }), 400
 
 
 @app.route('/analytics', methods=['POST'])
 @schema.validate(RETRIEVE_ANALYTICS_BODY_SCHEMA)
 def retrieve_analytics():
+    """Endpoint for retrieving data about user activities through some period of time"""
     user_id: str = request.json.get('user_id')
     time_type: int = request.json.get('time_type')
-    if time_type == TimeTypes.Week.value:
+    if time_type == TimeTypes.WEEK.value:
         return WeekAnalytics.retrieve_week_analytics(user_id)
-    if time_type == TimeTypes.Month.value:
-        raise NotImplementedError("This time type is now available at the moment! Probably, it is not implemented!")
-    raise ValueError("Something went wrong")
+    if time_type == TimeTypes.MONTH.value:
+        raise NotImplementedError("This time type is now available at the moment! "
+                                  "Probably, this feature is not implemented!")
+    raise ValueError("Sorry, something went wrong")
 
 
 @app.route('/analytics/update', methods=['POST'])
 @schema.validate(WRITE_ANALYTICS_BODY_SCHEMA)
 def write_analytics():
+    """Endpoint for gathering daily activities such as number_of_games, rating, etc."""
     looser_data: dict = request.json.get('looser_data')
     winner_data: dict = request.json.get('winner_data')
 

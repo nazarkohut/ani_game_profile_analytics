@@ -1,3 +1,4 @@
+"""Contains connection variables and different keys for working with databases, third-party APIs, etc."""
 import os
 
 from azure.cosmos import CosmosClient

@@ -1,16 +1,20 @@
+"""Contains classes and methods for gathering data within the day and helps you to work with it"""
 import json
 
 from azure.cosmos import ContainerProxy
 from azure.cosmos.exceptions import CosmosResourceNotFoundError
 
-from misc.functions import TimeBasedIds
+from misc.ids import TimeBasedIds
 from misc.time import Time
 from config import container
 
 
 class EveryDayAnalytics:
+    """Makes working with everyday analytics container as easy as possible"""
+
     @classmethod
-    def find_item(cls, item_id, container: ContainerProxy = container):
+    def find_item(cls, item_id,
+                  container: ContainerProxy = container):
         """Searches for item inside container based on item id"""
         try:
             return container.read_item(item=item_id, partition_key=item_id)
@@ -34,7 +38,10 @@ class EveryDayAnalytics:
         return data
 
     @classmethod
-    def write_new_item_or_update_existing(cls, items, container: ContainerProxy = container) -> None:
+    def write_new_item_or_update_existing(cls, items: list[tuple],
+                                          container: ContainerProxy = container) -> None:
+        """Runs through the list of items and writes an item inside the database container
+        if the item with specified id does not exist. Otherwise, updates the existing item"""
         for (item, user) in items:
             if item is None:
                 # print(f"Created {user.id} {item}")
@@ -47,12 +54,17 @@ class EveryDayAnalytics:
                 container.upsert_item(body=item)
 
     @classmethod
-    def print_every_day_profile_analytics(cls, container: ContainerProxy = container, max_item_count: int = 10) -> None:
+    def print_every_day_profile_analytics(cls, container: ContainerProxy = container,
+                                          max_item_count: int = 10) -> None:
+        """Prints every item(or a limited number of items) from a particular container"""
         query = "SELECT * FROM AniGame"
         params = []
 
         items = container.query_items(
-            query=query, parameters=params, enable_cross_partition_query=True, max_item_count=max_item_count
+            query=query,
+            parameters=params,
+            enable_cross_partition_query=True,
+            max_item_count=max_item_count
         )
 
         for item in items:
