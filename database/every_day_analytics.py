@@ -13,7 +13,7 @@ class EveryDayAnalytics:
     """Makes working with everyday analytics container as easy as possible"""
 
     @classmethod
-    def find_item(cls, item_id,
+    def find_item(cls, item_id: any,
                   container: ContainerProxy = container):
         """Searches for item inside container based on item id"""
         try:
