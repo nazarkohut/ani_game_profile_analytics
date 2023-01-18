@@ -46,8 +46,8 @@ def retrieve_analytics():
     if time_type == TimeTypes.WEEK.value:
         return WeekAnalytics.retrieve_week_analytics(user_id)
     if time_type == TimeTypes.MONTH.value:
-        raise NotImplementedError("This time type is now available at the moment! "
-                                  "Probably, this feature is not implemented!")
+        raise NotImplementedError(
+            "This time type is now available at the moment! Probably, this feature is not implemented!")
     raise ValueError("Sorry, something went wrong")
 
 
